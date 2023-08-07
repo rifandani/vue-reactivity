@@ -1,18 +1,18 @@
-const product = { price: 15, quantity: 2 };
+const product = { price: 15, quantity: 2 }; // state
 
-let total = product.price * product.quantity;
+let total = product.price * product.quantity; // derived state
 
-console.log({ total });
+console.log('first', total);
 
 product.quantity = 3;
-console.log({ total }); // Does not recalculate
+console.log('second', total); // Does not recalculate
 
 product.price = 12;
-console.log({ total }); // Does not recalculate
-
-// executing total = product.price * product.quantity
-// every time something changes would be tedious 😣
+console.log('third', total); // Does not recalculate
 
 product.price = 20;
 total = product.price * product.quantity;
-console.log({ total }); // Recalculate due to line 22
+console.log('last', total); // Recalculate due to previous line
+
+// executing total = product.price * product.quantity
+// every time something changes would be tedious
