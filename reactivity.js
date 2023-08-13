@@ -1,7 +1,15 @@
 const product = reactive({ price: 15, quantity: 2 });
 
 let total = 0;
-let deps = new Set(); // list of effects will be saved here
+/**
+ * list of effects will be saved here
+ * data structure be like:
+ *
+ * Set [
+ *   calculateTotal, // always consist of one calculateTotal, because Set prohibit the same reference
+ * ]
+ */
+let deps = new Set();
 
 const calculateTotal = () => {
   total = product.price * product.quantity;
@@ -55,6 +63,20 @@ calculateTotal();
 
 product.price = 12;
 product.quantity = 5;
+
+/**
+ * What it looks like in react
+ *
+ * useEffect(() => {
+ *   setTotal(product.price * product.quantity);
+ * }, [product.price, product.quantity])
+ *
+ * // at some point of time in your app, you want to
+ * setProduct(prev => {...prev, price: 12})
+ *
+ * // at some point of time in your app, you want to
+ * setProduct(prev => {...prev, quantity: 5})
+ */
 
 // results in console =>
 // 🔎 track price
