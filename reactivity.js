@@ -9,10 +9,10 @@ let total = 0;
  *   { key: { price: 15, quantity: 2 }, value:
  *     Map [
  *       { key: 'price', value:
- *         Set [ calculateTotal ]
+ *         Set [ calculateTotal ] // always consist of one calculateTotal function, because Set prohibit the same reference
  *       },
  *       { key: 'quantity', value:
- *         Set [ calculateTotal ]
+ *         Set [ calculateTotal ] // always consist of one calculateTotal function, because Set prohibit the same reference
  *       }
  *     ]
  *   },
