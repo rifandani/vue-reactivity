@@ -16,3 +16,9 @@ console.log('last', total); // Recalculate due to previous line
 
 // executing total = product.price * product.quantity
 // every time something changes would be tedious
+
+// results in console =>
+// first 30
+// second 30
+// third 30
+// last 60
