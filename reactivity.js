@@ -1,86 +1,120 @@
-// ----------------------------------------------------------------
-// Vue 3 Reactivity
-// Marc Backes (@themarcba)
-// ----------------------------------------------------------------
+const product = reactive({ price: 15, quantity: 2 });
 
-const product = reactive({ price: 15, quantity: 2 })
-
-let total = 0
+let total = 0;
+/**
+ * store all states in weak reference
+ * data structure be like:
+ *
+ * WeakMap [
+ *   { key: { price: 15, quantity: 2 }, value:
+ *     Map [
+ *       { key: 'price', value:
+ *         Set [ calculateTotal ]
+ *       },
+ *       { key: 'quantity', value:
+ *         Set [ calculateTotal ]
+ *       }
+ *     ]
+ *   },
+ * ];
+ */
+let targetMap = new WeakMap();
 
 const calculateTotal = () => {
-    total = product.price * product.quantity
-}
-
-let targetMap = new WeakMap()
+  total = product.price * product.quantity;
+};
 
 // Register an effect
 function track(target, key) {
-    console.log('🔎 track', key)
-    // Get depsMap from targetMap
-    let depsMap = targetMap.get(target)
-    if (!depsMap) {
-        // new depsMap if it doesn't exist yet
-        depsMap = new Map()
-        targetMap.set(target, depsMap)
-    }
+  console.log('🔎 track', key);
 
-    // Get dep from depsMap
-    let dep = depsMap.get(key)
-    if (!dep) {
-        // new dep if it doesn't exist yet
-        dep = new Set()
-        depsMap.set(key, dep)
-    }
+  // Get depsMap from targetMap
+  let depsMap = targetMap.get(target);
+  if (!depsMap) {
+    // mutate depsMap if it doesn't exist yet
+    depsMap = new Map();
+    targetMap.set(target, depsMap);
+  }
 
-    // Add effect
-    dep.add(calculateTotal)
+  // Get dep from depsMap
+  let depsSet = depsMap.get(key);
+  if (!depsSet) {
+    // mutate depsSet if it doesn't exist yet
+    depsSet = new Set();
+    depsMap.set(key, depsSet);
+  }
+
+  // Add effect
+  depsSet.add(calculateTotal);
 }
 
 // Execute all registered effects for the target/key combination
 function trigger(target, key) {
-    console.log('💥 trigger', key)
-    // Get depsMap from targetMap
-    let depsMap = targetMap.get(target)
-    if (!depsMap) {
-        // If there is no depsMap, no need to resume
-        return
-    }
+  console.log('💥 trigger', key);
 
-    // Get dep from depsMap
-    let dep = depsMap.get(key)
-    if (!dep) {
-        // If there is no dep, no need to resume
-        return
-    }
+  // Get depsMap from targetMap
+  let depsMap = targetMap.get(target);
+  if (!depsMap) {
+    // If there is no depsMap, no need to resume
+    console.log(`💥 trigger - depsMap does not exists with target =>`, target);
+    return;
+  }
 
-    // Execute all effects
-    dep.forEach(effect => effect())
+  // Get dep from depsMap
+  let depsSet = depsMap.get(key);
+  if (!depsSet) {
+    console.log(`💥 trigger - depsSet does not exists with key =>`, key);
+    // If there is no dep, no need to resume
+    return;
+  }
+
+  // Execute all effects
+  depsSet.forEach((effect) => effect());
 }
 
-// Makes an object "reactive". Changes will be triggered, once the property is tracked
+// Makes an object "reactive".
+// Changes will be triggered, once the property is tracked
 function reactive(target) {
-    const handler = {
-        // Intercept getter
-        get(target, key, receiver) {
-            const result = Reflect.get(target, key, receiver)
-            track(target, key) //track changes for the key in the target
-            return result
-        },
-        // Intercept setter
-        set(target, key, value, receiver) {
-            const result = Reflect.set(target, key, value, receiver)
-            trigger(target, key) // trigger a change in the target
-            return result
-        },
-    }
-    return new Proxy(target, handler)
+  const handler = {
+    // Intercept getter
+    get(target, key, receiver) {
+      const result = Reflect.get(target, key, receiver);
+      track(target, key); // track changes for the key in the target
+      return result;
+    },
+    // Intercept setter
+    set(target, key, value, receiver) {
+      const result = Reflect.set(target, key, value, receiver);
+      trigger(target, key); // trigger a change in the target
+      return result;
+    },
+  };
+  return new Proxy(target, handler);
 }
 
 // still needs to be executed once!
 // if not, the properties will never be tracked
 // this will be fixed in stage 6
-calculateTotal()
+calculateTotal();
 
-console.log(total)
-product.quantity = 100
-console.log(product.quantity)
+console.log(total);
+product.quantity = 100;
+console.log(product.quantity);
+
+/**
+ * what it looks like in react
+ *
+ * useEffect(() => {
+ *  setTotal(product.price * product.quantity)
+ * }, [product.price, product.quantity])
+ */
+
+// results in console =>
+// 🔎 track price
+// 🔎 track quantity
+// 30
+// 💥 trigger quantity
+// 🔎 track price
+// 🔎 track quantity
+// 🔎 track quantity
+// 100
