@@ -10,8 +10,9 @@ It contains a basic implementation of the Vue 3 reactivity engine - from scratch
 
 This is the **main branch**, but there are branches that represent different stages of the project, so people can follow along step by step.
 
-- [Stage 0](https://github.com/rifandani/vue-reactivity/tree/stage/1): Basic HTML and JS structure set up
-- [Stage 1](https://github.com/rifandani/vue-reactivity/tree/stage/1): Prove why we need a reactivity engine
+- [Stage 1](https://github.com/rifandani/vue-reactivity/tree/stage/1): Basic HTML and JS structure set up
+- [Stage 2](https://github.com/rifandani/vue-reactivity/tree/stage/2): Prove why we need a reactivity engine
+- [Stage 3](https://github.com/rifandani/vue-reactivity/tree/stage/3): Set up proxy
 - [Stage 4](https://github.com/rifandani/vue-reactivity/tree/stage/4): Write reactive function
 - [Stage 5](https://github.com/rifandani/vue-reactivity/tree/stage/5): Enhance observer pattern (with WeakMap)
 - [Stage 6](https://github.com/rifandani/vue-reactivity/tree/stage/6): Add watcher
