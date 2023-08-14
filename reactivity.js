@@ -5,8 +5,16 @@
 
 const product = { price: 15, quantity: 2 }; // state
 
-let total = 0;
-let deps = new Set(); // list of effects will be saved here
+let total = 0; // derived state
+/**
+ * list of effects will be saved here
+ * data structure be like:
+ *
+ * Set [
+ *   calculateTotal, // always consist of one calculateTotal, because Set prohibit the same reference
+ * ]
+ */
+let deps = new Set();
 
 function calculateTotal() {
   total = product.price * product.quantity;
@@ -40,7 +48,7 @@ const proxy = new Proxy(product, {
   },
   // Intercept setter
   set(target, key, value, receiver) {
-    console.log('set', key, '=>', value);
+    console.log('set', key, 'to', value);
     const result = Reflect.set(target, key, value, receiver);
     trigger(target, key); // trigger a change in the target
     return result;
@@ -53,9 +61,9 @@ console.log(proxy.price);
 proxy.quantity = 5;
 console.log(proxy.quantity);
 
-// Results in:
+// Results in console =>
 // get price from {price: 15, quantity: 2}
-// set price => 25
+// set price to 25
 // get price from {price: 25, quantity: 2}
-// set quantity => 5
+// set quantity to 5
 // get quantity from {price: 25, quantity: 5}
