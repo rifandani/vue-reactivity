@@ -1,24 +1,21 @@
-let activeEffect = null; // Function / null
+/**
+ * @type {Function / null}
+ */
+let activeEffect = null;
+
 /**
  * store all states in weak reference
- * data structure be like:
  *
- * WeakMap [
- *   { key: {}, value:
- *     Map [
- *       { key: 'value', value:
- *         Set [
- *           () => { result.value = getter();
- *           () => document.body.style.backgroundColor = product.value.color; }
- *         ]
- *       },
- *     ]
- *   },
- * ];
+ * @type {WeakMap<object, Map<PropertyKey, Set<Function>>>}
  */
 let targetMap = new WeakMap();
 
-// Register an effect
+/**
+ * Register/Track an effect.
+ *
+ * @param {object} target - could be an empty object
+ * @param {PropertyKey} key - valid object property
+ */
 function track(target, key) {
   // Get depsMap from targetMap
   let depsMap = targetMap.get(target);
@@ -40,7 +37,12 @@ function track(target, key) {
   if (activeEffect) dep.add(activeEffect);
 }
 
-// Execute all registered effects for the target/key combination
+/**
+ * Execute all registered effects for the target/key combination
+ *
+ * @param {object} target - could be an empty object
+ * @param {PropertyKey} key - valid object property
+ */
 function trigger(target, key) {
   // Get depsMap from targetMap
   let depsMap = targetMap.get(target);
@@ -60,26 +62,52 @@ function trigger(target, key) {
   dep.forEach((effect) => effect());
 }
 
-// Makes an object "reactive". Changes will be triggered, once the property is tracked
+/**
+ * Makes an object "reactive".
+ * Changes will be triggered, once the property is tracked
+ *
+ * @param {object} target - MUST be an object
+ * @returns {Proxy}
+ */
 function reactive(target) {
   const handler = {
-    // Intercept getter
+    /**
+     * Intercept getter
+     *
+     * @param {object} target - MUST be an object
+     * @param {PropertyKey} key - valid object property
+     * @param {Proxy} receiver - the Proxy itself
+     * @returns {object}
+     */
     get(target, key, receiver) {
       const result = Reflect.get(target, key, receiver);
       track(target, key); // track changes for the key in the target
       return result;
     },
-    // Intercept setter
+    /**
+     * Intercept setter
+     *
+     * @param {object} target - MUST be an object
+     * @param {PropertyKey} key - valid object property
+     * @param {any} value - anything
+     * @param {Proxy} receiver - the Proxy itself
+     * @returns {boolean}
+     */
     set(target, key, value, receiver) {
       const result = Reflect.set(target, key, value, receiver);
       trigger(target, key); // trigger a change in the target
       return result;
     },
   };
+
   return new Proxy(target, handler);
 }
 
-// Watcher
+/**
+ * Watcher, run effects if it exists
+ *
+ * @param {Function} fn - function to run as side effects
+ */
 function effect(fn) {
   activeEffect = fn;
   // Only execute when there is an activeEffect
@@ -87,15 +115,29 @@ function effect(fn) {
   activeEffect = null;
 }
 
-// The ref class is a reactive object with a single value (called "value")
+/**
+ * The ref class is a reactive object with a single "virtual" value (called "value").
+ *
+ * @description Currently does not support deep object tracking.
+ * @param {any} raw - any value
+ * @returns {{ value: any }} wrapped value in "virtual" .value prop
+ */
 function ref(raw) {
   let r = {
-    // Intercept getter
+    /**
+     * Intercept getter
+     *
+     * @returns {any} - whatever user passed in
+     */
     get value() {
       track(r, 'value');
       return raw;
     },
-    // Intercept setter
+    /**
+     * Intercept setter
+     *
+     * @param {any} newValue - could be any value
+     */
     set value(newValue) {
       raw = newValue;
       trigger(r, 'value');
@@ -104,7 +146,13 @@ function ref(raw) {
   return r;
 }
 
-// Computed property
+/**
+ * Computed property which uses `ref` and register `effect` behind the scenes.
+ *
+ * @template T
+ * @param {() => T} getter - function that returns any value
+ * @returns {{ value: T }} wrapped value in "virtual" .value prop
+ */
 function computed(getter) {
   let result = ref();
   effect(() => {
