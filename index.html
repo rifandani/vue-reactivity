@@ -1,39 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Vue is Awesome</title>
-    </head>
-    <body>
-        <h1>Vue is awesome!</h1>
-        <h2>$ <span id="total">0</span></h2>
-        <button onclick="product.quantity--">-</button>
-        <button onclick="product.quantity++">+</button>
-        <input
-            type="color"
-            value="#ff69b4"
-            oninput="product.color = this.value"
-        />
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add computed property</title>
+  </head>
+  <body>
+    <h1>Add computed property!</h1>
+    <h2>Rp <span id="total">0</span></h2>
+    <!--
+      We can't do something like `product.value.quantity -= 1` because our implementation does not deep track the object
+      So in order to make it reactive, we need to mutate the root object
+     -->
+    <button
+      onclick="product.value = { ...product.value, quantity: product.value.quantity - 1 }"
+    >
+      -
+    </button>
+    <button
+      onclick="product.value = { ...product.value, quantity: product.value.quantity + 1 }"
+    >
+      +
+    </button>
+    <input
+      type="color"
+      value="#ff69b4"
+      oninput="product.value = { ...product.value, color: this.value }"
+    />
 
-        <script src="reactivity.js"></script>
-        <script>
-            const product = reactive({
-                price: 15,
-                quantity: 2,
-                color: 'hotpink',
-            })
-            let total = 0
+    <script src="reactivity.js"></script>
+    <script>
+      const product = ref({
+        price: 15_000,
+        quantity: 2,
+        color: 'hotpink',
+      });
+      let total = computed(() => product.value.price * product.value.quantity);
 
-            effect(() => {
-                total = product.price * product.quantity
-                document.getElementById('total').innerText = total
-            })
+      effect(() => {
+        document.getElementById('total').innerText = total.value;
+      });
 
-            effect(() => {
-                document.body.style.backgroundColor = product.color
-            })
-        </script>
-    </body>
+      effect(() => {
+        document.body.style.backgroundColor = product.value.color;
+      });
+    </script>
+  </body>
 </html>
