@@ -91,8 +91,8 @@ function effect(fn) {
   activeEffect = null;
 }
 
-const product = reactive({ price: 15, quantity: 2 });
-let total = 0;
+const product = reactive({ price: 15, quantity: 2 }); // state
+let total = 0; // derived state
 
 // Actually registering a side effect, instead of manual calculateTotal function from before
 effect(() => {
