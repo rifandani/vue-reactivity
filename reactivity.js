@@ -1,6 +1,6 @@
-const product = reactive({ price: 15, quantity: 2 });
+const product = reactive({ price: 15, quantity: 2 }); // state
 
-let total = 0;
+let total = 0; // derived state
 /**
  * store all states in weak reference
  * data structure be like:
@@ -100,14 +100,6 @@ calculateTotal();
 console.log(total);
 product.quantity = 100;
 console.log(product.quantity);
-
-/**
- * what it looks like in react
- *
- * useEffect(() => {
- *  setTotal(product.price * product.quantity)
- * }, [product.price, product.quantity])
- */
 
 // results in console =>
 // 🔎 track price
