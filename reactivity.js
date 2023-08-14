@@ -1,4 +1,21 @@
-let activeEffect = null;
+let activeEffect = null; // Function / null
+/**
+ * store all states in weak reference
+ * data structure be like:
+ *
+ * WeakMap [
+ *   { key: {}, value:
+ *     Map [
+ *       { key: 'value', value:
+ *         Set [
+ *           () => { result.value = getter();
+ *           () => document.body.style.backgroundColor = product.value.color; }
+ *         ]
+ *       },
+ *     ]
+ *   },
+ * ];
+ */
 let targetMap = new WeakMap();
 
 // Register an effect
