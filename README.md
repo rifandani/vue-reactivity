@@ -15,7 +15,7 @@ This is the **main branch**, but there are branches that represent different sta
 - [Stage 3](https://github.com/rifandani/vue-reactivity/tree/stage/3): Set up proxy
 - [Stage 4](https://github.com/rifandani/vue-reactivity/tree/stage/4): Write reactive function
 - [Stage 5](https://github.com/rifandani/vue-reactivity/tree/stage/5): Enhance observer pattern (with WeakMap)
-- [Stage 6](https://github.com/rifandani/vue-reactivity/tree/stage/6): Add watcher
+- [Stage 6](https://github.com/rifandani/vue-reactivity/tree/stage/6): Add watcher instead of manual calculateTotal
 - [Stage 7](https://github.com/rifandani/vue-reactivity/tree/stage/7): Refactor code take out user code from lib code
 - [Stage 8](https://github.com/rifandani/vue-reactivity/tree/stage/8): Change total in the DOM
 - [Stage 9](https://github.com/rifandani/vue-reactivity/tree/stage/9): Add buttons that change the quantity (and total in the DOM)
