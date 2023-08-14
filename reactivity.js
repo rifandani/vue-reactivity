@@ -1,115 +1,100 @@
-let activeEffect = null; // Function / null
-/**
- * store all states in weak reference
- * data structure be like:
- *
- * WeakMap [
- *   { key: {}, value:
- *     Map [
- *       { key: 'value', value:
- *         Set [
- *           () => { result.value = getter();
- *           () => document.body.style.backgroundColor = product.value.color; }
- *         ]
- *       },
- *     ]
- *   },
- * ];
- */
-let targetMap = new WeakMap();
+// type Dep = Set<any>
+// type KeyToDepMap = Map<any, Dep>
 
-// Register an effect
-function track(target, key) {
-  // Get depsMap from targetMap
+/**
+ * @type {Map<RefImpl, Map<'value', Set<Function>>>}
+ */
+const targetMap = new Map();
+/**
+ * @type {Function | undefined}
+ */
+let activeEffect;
+
+/**
+ * @param {object} target
+ */
+const track = (target) => {
+  /**
+   * return early if activeEffect is undefined.
+   */
+  if (!activeEffect) {
+    return;
+  }
+
   let depsMap = targetMap.get(target);
   if (!depsMap) {
-    // new depsMap if it doesn't exist yet
     depsMap = new Map();
     targetMap.set(target, depsMap);
   }
 
-  // Get dep from depsMap
-  let dep = depsMap.get(key);
-  if (!dep) {
-    // new dep if it doesn't exist yet
-    dep = new Set();
-    depsMap.set(key, dep);
+  let deps = depsMap.get('value');
+  if (!deps) {
+    deps = new Set();
+    depsMap.set('value', deps);
   }
 
-  // Add effect
-  if (activeEffect) dep.add(activeEffect);
-}
+  deps.add(activeEffect);
+};
 
-// Execute all registered effects for the target/key combination
-function trigger(target, key) {
-  // Get depsMap from targetMap
+/**
+ * @param {object} target
+ */
+const trigger = (target) => {
   let depsMap = targetMap.get(target);
   if (!depsMap) {
-    // If there is no depsMap, no need to resume
     return;
   }
 
-  // Get dep from depsMap
-  let dep = depsMap.get(key);
-  if (!dep) {
-    // If there is no dep, no need to resume
-    return;
-  }
-
-  // Execute all effects
-  dep.forEach((effect) => effect());
-}
-
-// Makes an object "reactive". Changes will be triggered, once the property is tracked
-function reactive(target) {
-  const handler = {
-    // Intercept getter
-    get(target, key, receiver) {
-      const result = Reflect.get(target, key, receiver);
-      track(target, key); // track changes for the key in the target
-      return result;
-    },
-    // Intercept setter
-    set(target, key, value, receiver) {
-      const result = Reflect.set(target, key, value, receiver);
-      trigger(target, key); // trigger a change in the target
-      return result;
-    },
-  };
-  return new Proxy(target, handler);
-}
-
-// Watcher
-function effect(fn) {
-  activeEffect = fn;
-  // Only execute when there is an activeEffect
-  if (activeEffect) activeEffect();
-  activeEffect = null;
-}
-
-// The ref class is a reactive object with a single value (called "value")
-function ref(raw) {
-  let r = {
-    // Intercept getter
-    get value() {
-      track(r, 'value');
-      return raw;
-    },
-    // Intercept setter
-    set value(newValue) {
-      raw = newValue;
-      trigger(r, 'value');
-    },
-  };
-  return r;
-}
-
-// Computed property
-function computed(getter) {
-  let result = ref();
-  effect(() => {
-    result.value = getter();
+  depsMap.forEach((dep) => {
+    dep.forEach((eff) => {
+      eff();
+    });
   });
+};
 
-  return result;
+class RefImpl {
+  /**
+   * @type {string}
+   */
+  _value;
+
+  /**
+   * @param {string} val
+   */
+  constructor(val) {
+    this._value = val;
+  }
+
+  /**
+   * @returns {string}
+   */
+  get value() {
+    track(this);
+    return this._value;
+  }
+
+  /**
+   * @param {string} val
+   */
+  set value(val) {
+    this._value = val;
+    trigger(this);
+  }
 }
+
+/**
+ * @param {string} val
+ * @returns {RefImpl}
+ */
+const ref = (val) => {
+  return new RefImpl(val);
+};
+
+/**
+ * @param {Function} fn
+ */
+const effect = (fn) => {
+  activeEffect = fn;
+  fn();
+  activeEffect = undefined;
+};

@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add computed property</title>
+    <title>Integrate with HTML</title>
   </head>
   <body>
-    <h1>Add computed property!</h1>
+    <h1>Integrate with HTML!</h1>
     <h2>Rp <span id="total">0</span></h2>
     <!--
       We can't do something like `product.value.quantity -= 1` because our implementation does not deep track the object
@@ -23,11 +23,6 @@
     >
       +
     </button>
-    <input
-      type="color"
-      value="#ff69b4"
-      oninput="product.value = { ...product.value, color: this.value }"
-    />
 
     <script src="reactivity.js"></script>
     <script>
@@ -36,14 +31,11 @@
         quantity: 2,
         color: 'hotpink',
       });
-      let total = computed(() => product.value.price * product.value.quantity);
+      let total = 0;
 
       effect(() => {
-        document.getElementById('total').innerText = total.value;
-      });
-
-      effect(() => {
-        document.body.style.backgroundColor = product.value.color;
+        total = product.value.price * product.value.quantity;
+        document.getElementById('total').innerText = total;
       });
     </script>
   </body>
