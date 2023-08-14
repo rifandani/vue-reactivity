@@ -1,6 +1,6 @@
-const product = reactive({ price: 15, quantity: 2 });
+const product = reactive({ price: 15, quantity: 2 }); // state
 
-let total = 0;
+let total = 0; // derived state
 /**
  * list of effects will be saved here
  * data structure be like:
@@ -65,16 +65,16 @@ product.price = 12;
 product.quantity = 5;
 
 /**
- * What it looks like in react
+ * What it might look like in react
  *
  * useEffect(() => {
  *   setTotal(product.price * product.quantity);
  * }, [product.price, product.quantity])
  *
- * // at some point of time in your app, you want to
+ * // at some point of time in your app
  * setProduct(prev => {...prev, price: 12})
  *
- * // at some point of time in your app, you want to
+ * // at some point of time in your app
  * setProduct(prev => {...prev, quantity: 5})
  */
 
